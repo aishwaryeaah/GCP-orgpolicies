@@ -1,31 +1,23 @@
 Policy Enforcement Document: constraints/storage.secureHttpTransport
-1. Overview: What is constraints/storage.secureHttpTransport?
-•	• The constraints/storage.secureHttpTransport is an Organization Policy Constraint in Google Cloud that enforces secure communication to and from Cloud Storage buckets.
-•	• This policy denies any unencrypted (HTTP) traffic to buckets.
-•	• Helps in preventing man-in-the-middle attacks by requiring encryption in transit.
-•	• Enforces data protection best practices aligned with compliance requirements (e.g., PCI-DSS, ISO 27001).
-•	• Once enforced, all HTTP requests will be rejected with an error.
+1. What is constraints/storage.secureHttpTransport?
+The `constraints/storage.secureHttpTransport` is an Organization Policy Constraint provided by Google Cloud that enforces the use of HTTPS for all access to Cloud Storage buckets. When this constraint is set to `TRUE`, it prohibits any HTTP (unencrypted) communication to buckets, thereby ensuring encryption in transit for data security.
+•	Key Points:
+•	• Forces all communication to Google Cloud Storage to use HTTPS only.
+•	• Blocks insecure HTTP requests that can expose data to threats.
+•	• Supports encryption in transit best practices.
+•	• Can be applied at the organization, folder, or project level.
+•	• Retroactive in nature – impacts both new and existing resources once applied.
 2. What Are We Changing?
-•	• Enforcing constraints/storage.secureHttpTransport = TRUE across all projects.
-•	• Blocking any public or internal access over HTTP to GCS buckets.
-•	• Auditing existing applications/scripts for HTTP usage and updating them.
-•	• Updating project policies to comply with this constraint.
-•	• Ensuring future resources default to secure communication practices.
-3. Why Are We Changing This?
-•	• Prevent data leakage during transit by disallowing unencrypted access.
-•	• Mitigate security risks such as interception or tampering.
-•	• Align with regulatory and compliance frameworks.
-•	• Meet internal security and audit requirements.
-•	• Strengthen Zero Trust Architecture (ZTA) principles in the cloud environment.
-4. Actions for the Project Team
-•	• Audit applications, tools, or scripts using HTTP and update to HTTPS.
-•	• Validate third-party tools or services interacting with GCS use HTTPS.
-•	• Update internal documentation or onboarding guides to reflect this policy.
-•	• Communicate the change to developers and DevOps engineers.
-•	• Verify all Cloud Storage requests post-change to ensure continuity.
-5. Important Considerations
-•	• Projects using HTTP will experience request failures post-enforcement.
-•	• The policy is non-reversible without explicit exception approval.
-•	• Bucket-level configurations cannot override this organization policy.
-•	• Exemptions must be requested and justified through the Security Council.
-•	• Violations may result in non-compliance flags during audits or security reviews.
+We are enforcing the `constraints/storage.secureHttpTransport` policy across all projects. This means that any attempt to access Cloud Storage via HTTP will be blocked, and only HTTPS will be permitted going forward.
+•	• Enabling this policy across organization/folder/project levels.
+•	• Disabling all HTTP-based access to Cloud Storage buckets.
+•	• Standardizing secure communications across all cloud services.
+•	• Auditing and updating existing tools or services to use HTTPS.
+•	• Introducing compliance checkpoints to monitor adherence.
+3. What is the Action for the Project Team?
+Project teams are required to proactively ensure that all their systems and integrations comply with the new enforcement. Failure to adapt will result in request failures and possible service disruptions.
+•	• Review all existing applications, APIs, and scripts accessing Cloud Storage.
+•	• Migrate any HTTP-based endpoints to HTTPS immediately.
+•	• Check and update third-party integrations for HTTPS support.
+•	• Coordinate with security and cloud governance teams to verify compliance.
+•	• Test all access flows to confirm HTTPS-only behavior post-enforcement.
