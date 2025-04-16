@@ -1,23 +1,60 @@
-Policy Enforcement Document: constraints/storage.secureHttpTransport
-1. What is constraints/storage.secureHttpTransport?
-The `constraints/storage.secureHttpTransport` is an Organization Policy Constraint provided by Google Cloud that enforces the use of HTTPS for all access to Cloud Storage buckets. When this constraint is set to `TRUE`, it prohibits any HTTP (unencrypted) communication to buckets, thereby ensuring encryption in transit for data security.
-•	Key Points:
-•	• Forces all communication to Google Cloud Storage to use HTTPS only.
-•	• Blocks insecure HTTP requests that can expose data to threats.
-•	• Supports encryption in transit best practices.
-•	• Can be applied at the organization, folder, or project level.
-•	• Retroactive in nature – impacts both new and existing resources once applied.
-2. What Are We Changing?
-We are enforcing the `constraints/storage.secureHttpTransport` policy across all projects. This means that any attempt to access Cloud Storage via HTTP will be blocked, and only HTTPS will be permitted going forward.
-•	• Enabling this policy across organization/folder/project levels.
-•	• Disabling all HTTP-based access to Cloud Storage buckets.
-•	• Standardizing secure communications across all cloud services.
-•	• Auditing and updating existing tools or services to use HTTPS.
-•	• Introducing compliance checkpoints to monitor adherence.
-3. What is the Action for the Project Team?
-Project teams are required to proactively ensure that all their systems and integrations comply with the new enforcement. Failure to adapt will result in request failures and possible service disruptions.
-•	• Review all existing applications, APIs, and scripts accessing Cloud Storage.
-•	• Migrate any HTTP-based endpoints to HTTPS immediately.
-•	• Check and update third-party integrations for HTTPS support.
-•	• Coordinate with security and cloud governance teams to verify compliance.
-•	• Test all access flows to confirm HTTPS-only behavior post-enforcement.
+constraints/gcp.restrictNonCmekServices for cloudfunctions gen2
+
+
+
+Outcome - 
+Org policy is enforced 
+CMEK is required 
+Cloud Functions Gen2 is being blocked unless CMEK is provided (--kms-key)
+
+
+FYI for (cloud run functions / cloud functions gen 2) -
+Why Artifact Registry is Required When Using CMEK with Cloud Functions (Gen2)
+Cloud Functions (Gen2) are built and deployed as container-based workloads. These containers are built using Cloud Build and stored in Artifact Registry before being executed by Cloud Run. –imp– When enabling Customer-Managed Encryption Keys (CMEK) for Cloud Functions, the entire deployment and execution pipeline must be CMEK-compliant.
+Why It Is Required
+When the organization policy constraint constraints/gcp.restrictNonCmekServices is enforced, any Google Cloud services that do not use CMEK will be blocked. Therefore, it is necessary that all components involved in the lifecycle of the Cloud Function are configured to use CMEK. This includes:
+Cloud Run: Executes the function container and must be protected using the specified CMEK.
+
+
+Artifact Registry: Stores the function’s container image. This repository must be CMEK-enabled and configured to use the same key.
+
+
+Cloud Build (implicitly): Builds the container image from the source code.
+
+
+Required Permissions
+To successfully deploy a CMEK-enabled Cloud Function, the following service accounts must be granted the roles/cloudkms.cryptoKeyEncrypterDecrypter role on the key:
+Cloud Run Functions Service Agent: service-PROJECT_NUMBER@gcf-admin-robot.iam.gserviceaccount.com
+
+
+Artifact Registry Service Agent: service-PROJECT_NUMBER@gcp-sa-artifactregistry.iam.gserviceaccount.com
+
+
+Cloud Run Service Agent: service-PROJECT_NUMBER@serverless-robot-prod.iam.gserviceaccount.com
+
+
+Cloud Storage Service Agent: service-PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com
+
+
+These service agents require access to decrypt or encrypt data using the CMEK to ensure all operations involving function deployment and execution are permitted.
+ 
+
+If the org policy is disabled -
+(gcloud.functions.deploy) ResponseError: status=[400], code=[Ok], message=[Could not create Cloud Run service test-crf-4. Constraint constraints/gcp.restrictNonCmekServices violated for CreateService attempting to create revision without a CMEK key. See https://cloud.google.com/resource-manager/docs/organization-policy/org-policy-constraints for more information.]
+
+
+
+
+cloudfunctions api is under restricted services - (NOT using CMEK)
+Error - 
+(gcloud.functions.deploy) ResponseError: status=[400], code=[Ok], message=[The request has violated one or more Org Policies. Please refer to the respective violations for more information:
+type: "constraints/gcp.restrictNonCmekServices"
+subject: "orgpolicy:projects/aishwarya-orgpolicy-test"
+description: "Constraint constraints/gcp.restrictNonCmekServices violated for projects/aishwarya-orgpolicy-test attempting PrepareCreateFunction with `service domain` value set to cloudfunctions.googleapis.com. See https://cloud.google.com/resource-manager/docs/organization-policy/org-policy-constraints for more information."
+]
+
+
+Policy enforced - but not using same key as artifact registry 
+Error : 
+User managed repository projects/aishwarya-orgpolicy-test/locations/europe-west2/repositories/test-cmek-cloudfunctions must have been encrypted using the same KMS key as of the function (projects/aishwarya-orgpolicy-test/locations/europe-west2/keyRings/test-keyring2/cryptoKeys/unused-key).
+
