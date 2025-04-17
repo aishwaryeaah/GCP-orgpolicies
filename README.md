@@ -58,3 +58,14 @@ Policy enforced - but not using same key as artifact registry
 Error : 
 User managed repository projects/aishwarya-orgpolicy-test/locations/europe-west2/repositories/test-cmek-cloudfunctions must have been encrypted using the same KMS key as of the function (projects/aishwarya-orgpolicy-test/locations/europe-west2/keyRings/test-keyring2/cryptoKeys/unused-key).
 
+
+if service agent for cloud run functions is removed from kms encrypter decrypter role
+(gcloud.functions.deploy) ResponseError: status=[403], code=[Ok], message=[KMS encrypt/decrypt permission denied on the key 'projects/aishwarya-orgpolicy-test/locations/europe-west2/keyRings/my-keyring/cryptoKeys/my-cmek-key'. This can be fixed by granting the GCF P4SA 'serviceAccount:service-800420767752@gcf-admin-robot.iam.gserviceaccount.com' the role 'roles/cloudkms.cryptoKeyEncrypterDecrypter' on the key.
+
+
+if service agent for storage bucket is removed from kms encrypter decrypter role.
+(gcloud.functions.deploy) ResponseError: status=[403], code=[Ok], message=[Unable to clone object to bucket 'gcf-v2-sources-800420767752-308646351'. KMS encrypt/decrypt permission denied on the key 'projects/aishwarya-orgpolicy-test/locations/europe-west2/keyRings/my-keyring/cryptoKeys/my-cmek-key'. This can be fixed by granting 'serviceAccount:service-$PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com' the role 'roles/cloudkms.cryptoKeyEncrypterDecrypter' on the key.]
+
+
+if cloud run sa is removed from the role - 
+(gcloud.functions.deploy) OperationError: code=13, message=Could not create or update Cloud Run service test-crf-7. Revision 'test-crf-7-00001-ton' is not ready and cannot serve traffic. Please ensure that the provided encryption key URL is correct and the project's Google Cloud Run Service Agent has the permission [cloudkms.cryptoKeyVersions.useToDecrypt] and [cloudkms.cryptoKeyVersions.useToEncrypt] on resource projects/aishwarya-orgpolicy-test/locations/europe-west2/keyRings/my-keyring/cryptoKeys/my-cmek-key. Permission 'cloudkms.cryptoKeyVersions.useToEncrypt' denied on resource 'projects/aishwarya-orgpolicy-test/locations/europe-west2/keyRings/my-keyring/cryptoKeys/my-cmek-key' (or it may not exist).
